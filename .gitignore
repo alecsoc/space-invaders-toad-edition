@@ -1,0 +1,17 @@
+# Python bytecode (la basura que quieres evitar)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+venv/
+env/
+.venv/
+
+# VS Code / IDEs
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db

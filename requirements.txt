@@ -1,0 +1,4 @@
+arcade-machine-sdk
+
+# Otras dependencias
+pygame>=2.5.0
