@@ -38,6 +38,7 @@ class Settings:
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     BG_COLOR = (41, 60, 94)
+    YELLOW  = (0, 255, 255)
 
     # Assets Paths
     ASSETS_PATH = BASE_DIR / "assets"
