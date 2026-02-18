@@ -34,10 +34,20 @@ class Game(GameBase):
         print(f"--- {Settings.TITLE} Iniciado ---")
 
     def handle_events(self, events: list[pygame.event.Event]) -> None:
+        pausa = False
         for e in events:
             # Ejemplo de salida rápida (SUJETA A CAMBIOS)
             if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
                 self.stop()
+        for event in pygame.event.get():
+            if event.type ==  pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pausa = True
+                    confirmation = InGameScreen.pause(pausa)
+            if not confirmation:
+                pygame.display.flip()
+                    
+                    
             
             # TO-DO #2: Aquí irá la lógica de: self.player.handle_input(event)
 
