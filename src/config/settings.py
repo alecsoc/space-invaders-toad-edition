@@ -4,7 +4,7 @@ from arcade_machine_sdk import BASE_WIDTH, BASE_HEIGHT, DEFAULT_FPS
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 class Settings:
-    # Metadata
+    # --- Metadata ---
     TITLE = "Space Invaders: TOAD Edition"
     DESCRIPTION = "Implementación del clásico Space Invaders, adaptado para Taller de Objetos y Abstracción de Datos y el proyecto final 'Arcade Machine'."
     RELEASE_DATE = "1/2/2026"
@@ -13,12 +13,12 @@ class Settings:
 
     # --- Game Parameters ---
 
-    # --- Window Parameters ---
+    # Window Parameters
     WIDTH = BASE_WIDTH
     HEIGHT = BASE_HEIGHT
     FPS = DEFAULT_FPS
 
-    # Logic Parameters (PARCIALES, SUJETOS A CAMBIOS)
+    # Logic Parameters
     PLAYER_X = 365
     PLAYER_Y = 480
     PLAYER_SPEED = 300
@@ -34,11 +34,16 @@ class Settings:
     ENEMY_OFFSET_Y = 50
     COLLISION_RADIUS = 27
 
+    TRANSITION_DELAY = 1.0
+
     # Colors
-    WHITE = (255, 255, 255)
-    BLACK = (0, 0, 0)
-    BG_COLOR = (41, 60, 94)
-    YELLOW  = (0, 255, 255)
+    COLORS = {
+        "bg_color": (41, 60, 94),
+        "white": (255, 255, 255),
+        "black": (0, 0, 0),
+        "active_yellow": (255, 255, 0),
+        "pressed_yellow": (200, 200, 0),
+    }
 
     # Assets Paths
     ASSETS_PATH = BASE_DIR / "assets"
@@ -48,22 +53,20 @@ class Settings:
 
     # Assets Maps
     IMAGES_MAP = {
-        "background": "galaxy-bg.png",
+        "menu_bg": "galaxy-bg.png",
         "player": "space-ship.png",
         "enemy": "alien.png",
         "bullet": "bullet.png",
-        "icon": "ufo.png"
+        "icon": "ufo.png",
     }
 
     SOUNDS_MAP = {
         "main_theme": "music/SITB-Theme.wav",
         "shoot": "sfx/shoot-ship.wav",
-        "explosion": "sfx/hit-enemy.wav"
+        "explosion": "sfx/hit-enemy.wav",
     }
 
-    FONTS_MAP = {
-        "pixel": "score_text.ttf"
-    }
+    FONTS_MAP = {"pixel": "score_text.ttf"}
 
     # Dict for AssetManager
     IMAGES = {}
