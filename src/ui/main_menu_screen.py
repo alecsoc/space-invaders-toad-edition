@@ -5,10 +5,13 @@ from src.config.settings import Settings
 from src.managers.asset_manager import AssetManager
 
 from src.ui.components.text_label import TextLabel
+from src.ui.components.scoreboard import Scoreboard
 
 class MainMenu:
     def __init__(self):
         self.bg_image = AssetManager.get_image("menu_bg")
+
+        self.scoreboard = Scoreboard()
 
         screen_w = Settings.WIDTH
         screen_h = Settings.HEIGHT
@@ -128,6 +131,8 @@ class MainMenu:
         return None
     
     def update(self, dt):
+        self.scoreboard.update()
+
         if self.pending_action:
             self.transition_timer -= dt
 
@@ -144,6 +149,8 @@ class MainMenu:
             surface.blit(scaled_bg, (0, 0))
         else:
             surface.fill(Settings.COLORS["bg_color"])
+
+        self.scoreboard.draw(surface)
 
         for label in self.title_group:
             label.draw(surface)

@@ -10,7 +10,9 @@ class Bullet(pygame.sprite.Sprite):
         self.is_active = False
 
     def get_rect(self):
-        return pygame.Rect(self.x, self.y, self.image.get_width(), self.image.get_height())
+        return pygame.Rect(
+            self.x, self.y, self.image.get_width(), self.image.get_height()
+        )
 
     def fire(self, x, y, player_width):
         if not self.is_active:
@@ -23,7 +25,7 @@ class Bullet(pygame.sprite.Sprite):
             self.y -= self.speed * dt * 60
             if self.y <= 0:
                 self.is_active = False
-    
+
     def draw(self, surface):
         if self.is_active:
             surface.blit(self.image, (self.x, self.y))
