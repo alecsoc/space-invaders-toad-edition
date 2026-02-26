@@ -5,8 +5,10 @@ from src.config.settings import Settings
 
 from src.managers.asset_manager import AssetManager
 from src.managers.sound_player import SoundPlayer
+from src.managers.score_manager import ScoreManager
 
 from src.ui.main_menu_screen import MainMenu
+from src.ui.in_game_screen import InGameScreen
 
 class Game(GameBase):
     def __init__(self, metadata) -> None:
@@ -23,17 +25,18 @@ class Game(GameBase):
 
         AssetManager.load_all_assets()
 
-        SoundPlayer.play_music("main_theme")
-
         self.screens = {
             "MAIN_MENU": MainMenu(),
+            "GAMEPLAY": InGameScreen(),
         }
 
         self.current_screen = self.screens["MAIN_MENU"]
 
     def _process_screen_result(self, result: str) -> None:
         if result == "GOTO_GAMEPLAY":
-            print("Creando e iniciando gameplay...")
+            ScoreManager().reset_current()
+            self.screens["GAMEPLAY"].reset_game()
+            self.current_screen = self.screens["GAMEPLAY"]
         elif result == "GOTO_INSTR":
             print("Iniciando instrucciones...")
         elif result == "GOTO_CREDITS":
@@ -60,7 +63,12 @@ class Game(GameBase):
                 self._process_screen_result(result)
 
     def render(self) -> None:
-        self.current_screen.draw(self.surface)
+        self.surface.fill((0, 0, 0)) 
+    
+        if self.current_screen:
+            self.current_screen.draw(self.surface)
+        
+        pygame.display.flip()
 
     def stop(self) -> None:
         print("Deteniendo Space Invaders...")

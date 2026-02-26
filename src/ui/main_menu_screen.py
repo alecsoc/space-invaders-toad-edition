@@ -3,6 +3,7 @@ import pygame
 from src.config.settings import Settings
 
 from src.managers.asset_manager import AssetManager
+from src.managers.sound_player import SoundPlayer
 
 from src.ui.components.text_label import TextLabel
 from src.ui.components.scoreboard import Scoreboard
@@ -23,7 +24,7 @@ class MainMenu:
         self.title_group = [
             TextLabel(
                 x=center_x, 
-                y=((screen_h // 5) + (i * 80)),
+                y=((screen_h // 4.5) + (i * 80)),
                 text=text.upper(), 
                 font_key="pixel", 
                 font_size=100 if i < 2 else 45
@@ -119,6 +120,8 @@ class MainMenu:
                 self.options[self.current_selection].set_state("active")
 
                 if event.key == pygame.K_RETURN:
+                    SoundPlayer.play_sfx("select")
+
                     action = self.navigation_map[self.current_selection]["next"]
 
                     if action == "EXIT":

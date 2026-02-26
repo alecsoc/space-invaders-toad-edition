@@ -9,19 +9,19 @@ class Scoreboard:
         self.manager = ScoreManager()
 
         screen_w = Settings.WIDTH
-        screen_h = Settings.HEIGHT
 
-        center_x = screen_w // 2
-        start_y = screen_h // 2
-        spacing = 90
+        fin_x = screen_w - 100
+        init_x = 100
+        margin_top = 50
+        gap = margin_top * 2
 
-        text_size = 25
+        text_size = 30
 
         config = [
-            {"x": 100, "y": 30, "text": "SCORE", "size": text_size},
-            {"x": 100, "y": 65, "text": "0000", "size": text_size},
-            {"x": center_x, "y": 30, "text": "HI-SCORE", "size": text_size},
-            {"x": center_x, "y": 65, "text": "0000", "size": text_size},
+            {"x": init_x, "y": margin_top, "text": "SCORE", "size": text_size},
+            {"x": init_x, "y": gap, "text": "0000", "size": text_size},
+            {"x": fin_x, "y": margin_top, "text": "HI-SCORE", "size": text_size},
+            {"x": fin_x, "y": gap, "text": "0000", "size": text_size},
         ]
 
         self.labels = [
