@@ -10,9 +10,7 @@ metadata = (
     .with_description(Settings.DESCRIPTION)
     .with_release_date(Settings.RELEASE_DATE)
     .with_group_number(Settings.GROUP_NUMBER)
-    .add_tag("Arcade")
-    .add_tag("Retro")
-    .add_tag("Shooter")
+    .with_tags(Settings.TAGS)
     .with_authors(Settings.AUTHORS)
 )
 

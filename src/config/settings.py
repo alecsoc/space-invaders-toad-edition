@@ -8,6 +8,7 @@ class Settings:
     TITLE = "Space Invaders: TOAD Edition"
     DESCRIPTION = "Implementación del clásico Space Invaders, adaptado para Taller de Objetos y Abstracción de Datos y el proyecto final 'Arcade Machine'."
     RELEASE_DATE = "1/2/2026"
+    TAGS = ["Arcade", "Retro", "Shooter"]
     AUTHORS = ["Alejandro Capriles", "Luciano Pietrucci"]
     GROUP_NUMBER = 8
 
