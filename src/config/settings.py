@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 class Settings:
     # --- Metadata ---
-    TITLE = "Space Invaders: TOAD Edition"
+    TITLE = "Space Invaders"
     DESCRIPTION = "Implementación del clásico Space Invaders, adaptado para Taller de Objetos y Abstracción de Datos y el proyecto final 'Arcade Machine'."
     RELEASE_DATE = "1/2/2026"
     TAGS = ["Arcade", "Retro", "Shooter"]
