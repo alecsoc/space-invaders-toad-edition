@@ -9,7 +9,7 @@ class Settings:
     DESCRIPTION = "Implementación del clásico Space Invaders, adaptado para Taller de Objetos y Abstracción de Datos y el proyecto final 'Arcade Machine'."
     RELEASE_DATE = "1/2/2026"
     TAGS = ["Arcade", "Retro", "Shooter"]
-    AUTHORS = ["Alejandro Capriles", "Luciano Pietrucci"]
+    AUTHORS = ["Alejandro Capriles", "Luciano Pietrucci", "Carlos Barranca"]
     GROUP_NUMBER = 8
 
     # --- Game Parameters ---
