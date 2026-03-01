@@ -6,7 +6,7 @@ class SoundPlayer:
     _current_music = None
 
     @staticmethod
-    def play_music(music):
+    def play_music(music: str) -> None:
         if SoundPlayer._current_music == music:
             return
             
@@ -19,7 +19,7 @@ class SoundPlayer:
             print(f"No se pudo cargar la música: {e}")
 
     @staticmethod
-    def play_sfx(key, volume=0.5):
+    def play_sfx(key: str, volume: float = 0.5):
         sound = Settings.SOUNDS.get(key)
         if sound:
             sound.set_volume(volume)

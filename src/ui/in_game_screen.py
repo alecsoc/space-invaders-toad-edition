@@ -1,66 +1,65 @@
 import pygame
-
 from src.config.settings import Settings
-
 from src.managers.asset_manager import AssetManager
 from src.managers.sound_player import SoundPlayer
 from src.managers.score_manager import ScoreManager
 from src.managers.enemy_manager import EnemyManager
 from src.managers.shield_manager import ShieldManager
-
 from src.ui.components.scoreboard import Scoreboard
 from src.ui.components.game_over import GameOverComponent
-
 from src.entities.bullet import Bullet
 from src.entities.player import Player
+from src.ui.base_screen import BaseScreen
+from typing import TYPE_CHECKING, List, Optional
+from arcade_machine_sdk import BASE_WIDTH
 
-class InGameScreen:
-    def __init__(self):
-        self.bg_image = AssetManager.get_image("menu_bg")
-        self.scoreboard = Scoreboard()
-        self.shield_manager = ShieldManager()
+if TYPE_CHECKING:
+    from src.game import Game
+
+class InGameScreen(BaseScreen):
+    def __init__(self, game: "Game") -> None:
+        super().__init__(game)
+
+        self.bg_image: Optional[pygame.Surface] = AssetManager.get_image("menu_bg")
+        self.scoreboard: Scoreboard = Scoreboard()
+        self.shield_manager: ShieldManager = ShieldManager()
         
-        self.current_stage = 1
-        self.game_over = False
-        self.game_over_hud = GameOverComponent()
-        self.return_to_menu_timer = 5.0
+        self.current_stage: int = 1
+        self.game_over: bool = False
+        self.game_over_hud: GameOverComponent = GameOverComponent()
+        self.return_to_menu_timer: float = 5.0
 
-        self.bullets = []
-        self.last_player_shot = 0
+        self.bullets: List[Bullet] = []
+        self.last_player_shot: int = 0
 
-        self.pending_action = None
-        self.transition_timer = 0
-
-    def reset_game(self):
-        ScoreManager().reset_current() 
-        self.current_stage = 1
-        self.shield_manager = ShieldManager()
+        self.pending_action: Optional[str] = None
+        self.transition_timer: float = 0
         self._setup_entities()
 
-    def _setup_entities(self):
+    def _setup_entities(self) -> None:
         self.game_over = False
         self.return_to_menu_timer = 5.0
         self.bullets = []
 
         SoundPlayer.play_music("main_theme")
         
-        self.player = Player(
-            x=Settings.PLAYER_X,
-            y=Settings.PLAYER_Y,
+        self.player: Player = Player(
             speed=Settings.PLAYER_SPEED,
             image=AssetManager.get_image("player")
         )
+        self.player.set_initial_pos()
 
-        self.enemy_manager = EnemyManager(stage=self.current_stage)
+        self.enemy_manager: EnemyManager = EnemyManager(stage=self.current_stage)
 
-    def _handle_defeat(self):
+    def _handle_defeat(self) -> None:
         self.game_over = True
         SoundPlayer.stop_music()
         SoundPlayer.play_sfx("game_over")
         ScoreManager().save_high_score()
 
-    def handle_events(self, events):
-        if self.game_over: return None
+    def handle_events(self, events: List[pygame.event.Event]) -> None:
+        if self.game_over:
+            return
         
         for e in events:
             self.player.get_player_input(e)
@@ -72,10 +71,10 @@ class InGameScreen:
                     self._fire_bullet()
                     self.last_player_shot = now
 
-        return None
+        return
     
-    def _fire_bullet(self):
-        new_bullet = Bullet(
+    def _fire_bullet(self) -> None:
+        new_bullet: Bullet = Bullet(
             speed=Settings.BULLET_SPEED,
             image=AssetManager.get_image("bullet")
         )
@@ -83,12 +82,14 @@ class InGameScreen:
         new_bullet.fire(self.player.get_rect())
         self.bullets.append(new_bullet)
     
-    def update(self, dt):
+    def update(self, dt: float) -> None:
         if self.game_over:
             self.return_to_menu_timer -= dt
 
             if self.return_to_menu_timer <= 0:
-                return "GOTO_MENU"
+                from src.ui.main_menu_screen import MainMenu
+                self.game.current_screen = MainMenu(self.game)
+                return
         
             return None
 
@@ -103,47 +104,43 @@ class InGameScreen:
 
             return None
         
-        for b in self.bullets[:]:
-            b.update(dt)
+        for player_bullet in self.bullets[:]:
+            player_bullet.update(dt)
 
-            if not b.is_active:
-                self.bullets.remove(b)
-                
+            if not player_bullet.is_active:
+                self.bullets.remove(player_bullet)
                 continue
 
             for enemy in self.enemy_manager.enemies:
-                if enemy.is_alive and b.get_rect().colliderect(enemy.rect):
+                if enemy.is_alive and player_bullet.get_rect().colliderect(enemy.rect.scale_by(0.9)):
                     enemy.is_alive = False
-                    b.is_active = False
+                    player_bullet.is_active = False
                     SoundPlayer.play_sfx("explosion", 0.2)
                     ScoreManager().add_points(enemy.points)
-
                     break
 
-            if b.is_active:
+            if player_bullet.is_active:
                 for shield_group in self.shield_manager.shields:
-                    if pygame.sprite.spritecollide(b, shield_group, True):
-                        b.is_active = False
-
+                    if pygame.sprite.spritecollide(player_bullet, shield_group, True):
+                        player_bullet.is_active = False
                         break
 
-        for e_bullet in self.enemy_manager.bullets[:]:
-            hit_shield = False
+        for enemy_bullet in self.enemy_manager.bullets[:]:
+            hit_shield: bool = False
 
             for shield_group in self.shield_manager.shields:
-                if pygame.sprite.spritecollide(e_bullet, shield_group, True):
-                    self.enemy_manager.bullets.remove(e_bullet)
+                if pygame.sprite.spritecollide(enemy_bullet, shield_group, True):
+                    self.enemy_manager.bullets.remove(enemy_bullet)
                     hit_shield = True
-
                     break
 
             if hit_shield: continue
 
-            if e_bullet.rect.colliderect(self.player.get_rect()):
-                result = self.player.take_damage()
+            if enemy_bullet.rect.colliderect(self.player.get_rect().scale_by(0.8)):
+                result: str = self.player.take_damage()
     
                 if result != "INVINCIBLE":
-                    self.enemy_manager.bullets.remove(e_bullet)
+                    self.enemy_manager.bullets.remove(enemy_bullet)
                     
                 if result == "GAME_OVER":
                     self._handle_defeat()
@@ -158,33 +155,23 @@ class InGameScreen:
 
             if enemy.rect.bottom >= self.player.rect.top:
                 self._handle_defeat()
-
                 break
 
         return None
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
         if self.bg_image:
-            scaled_bg = pygame.transform.scale(self.bg_image, surface.get_size())
+            scaled_bg: pygame.Surface = pygame.transform.scale(self.bg_image, surface.get_size())
             surface.blit(scaled_bg, (0, 0))
         else:
-            surface.fill(Settings.COLORS["bg_color"])
+            surface.fill(Settings.Colors.Background)
 
         self.shield_manager.draw(surface)
         self.enemy_manager.draw(surface)
-        for b in self.bullets: b.draw(surface)
+        for bullet in self.bullets:
+            bullet.draw(surface)
         self.player.draw(surface)
         self.scoreboard.draw(surface)
 
         if self.game_over:
             self.game_over_hud.draw(surface)
-        
-        self._draw_lives_icons(surface)
-
-    def _draw_lives_icons(self, surface):
-        if self.player.image:
-            life_icon = pygame.transform.scale(self.player.image, (25, 20))
-            for i in range(self.player.lives):
-                x = 20 + (i * 35)
-                y = Settings.HEIGHT - 35
-                surface.blit(life_icon, (x, y))

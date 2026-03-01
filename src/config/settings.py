@@ -1,5 +1,6 @@
 from pathlib import Path
 from arcade_machine_sdk import BASE_WIDTH, BASE_HEIGHT, DEFAULT_FPS
+import pygame
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -20,8 +21,7 @@ class Settings:
     FPS = DEFAULT_FPS
 
     # Logic Parameters
-    PLAYER_X = WIDTH // 2
-    PLAYER_Y = 680
+    PLAYER_INITIAL_Y = 680
     PLAYER_SPEED = 350
     BULLET_SPEED = 500
     PLAYER_FIRE_COOLDOWN = 400
@@ -62,13 +62,12 @@ class Settings:
     TRANSITION_DELAY = 1.0
 
     # Colors
-    COLORS = {
-        "bg_color": (41, 60, 94),
-        "white": (255, 255, 255),
-        "black": (0, 0, 0),
-        "active_yellow": (255, 255, 0),
-        "pressed_yellow": (200, 200, 0),
-    }
+    class Colors:
+        Background = (41, 60, 94)
+        White = (255, 255, 255)
+        Black = (0, 0, 0)
+        Active = (255, 255, 0)
+        Pressed = (200, 200, 0)
 
     # Assets Paths
     ASSETS_PATH = BASE_DIR / "assets"
@@ -101,6 +100,6 @@ class Settings:
     FONTS_MAP = {"pixel": "score_text.ttf"}
 
     # Dict for AssetManager
-    IMAGES = {}
-    SOUNDS = {}
-    FONTS = {}
+    IMAGES: dict[str, pygame.Surface] = {}
+    SOUNDS: dict[str, pygame.mixer.Sound] = {}
+    FONTS : dict[str, str]= {}

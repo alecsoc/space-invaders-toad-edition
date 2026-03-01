@@ -7,9 +7,24 @@ from src.managers.sound_player import SoundPlayer
 
 from src.ui.components.text_label import TextLabel
 from src.ui.components.scoreboard import Scoreboard
+from src.ui.base_screen import BaseScreen
+from typing import Callable
+from src.managers.score_manager import ScoreManager
+from typing import TYPE_CHECKING
+from src.ui.in_game_screen import InGameScreen
 
-class MainMenu:
-    def __init__(self):
+if TYPE_CHECKING:
+    from src.game import Game
+
+class MenuOptionButton(TextLabel):
+    def __init__(self, x: int, y: int, text: str, action: Callable[[], None]):
+        super().__init__(x, y, text, font_key="pixel")
+        self.action = action
+    
+
+class MainMenu(BaseScreen):
+    def __init__(self, game: "Game"):
+        super().__init__(game)
         self.bg_image = AssetManager.get_image("menu_bg")
 
         self.scoreboard = Scoreboard()
@@ -24,7 +39,7 @@ class MainMenu:
         self.title_group = [
             TextLabel(
                 x=center_x, 
-                y=((screen_h // 4.5) + (i * 80)),
+                y=int(((screen_h // 4.5) + (i * 80))),
                 text=text.upper(), 
                 font_key="pixel", 
                 font_size=100 if i < 2 else 45
@@ -32,135 +47,80 @@ class MainMenu:
             for i, text in enumerate(["SPACE", "INVADERS"])
         ]
 
-        self.options = {
-            "PLAY": TextLabel(
-                x=center_x, 
-                y=start_y, 
-                text="JUGAR", 
-                font_key="pixel",
-            )
-            .config_option(
-                Settings.COLORS["active_yellow"], 
-                Settings.COLORS["pressed_yellow"]
-            ),
-            "INSTRUCTIONS": TextLabel(
-                x=center_x,
-                y=start_y + spacing,
-                text="INSTRUCCIONES",
-                font_key="pixel"
-            )
-            .config_option(
-                Settings.COLORS["active_yellow"], 
-                Settings.COLORS["pressed_yellow"]
-            ),
-            "CREDITS": TextLabel(
-                x=center_x,
-                y=start_y + (spacing * 2),
-                text="CRÉDITOS",
-                font_key="pixel"
-            )
-            .config_option(
-                Settings.COLORS["active_yellow"], 
-                Settings.COLORS["pressed_yellow"]
-            ),
-            "QUIT": TextLabel(
-                x=center_x, 
-                y=start_y + (spacing * 3), 
-                text="SALIR", 
-                font_key="pixel"
-            )
-            .config_option(
-                Settings.COLORS["active_yellow"], 
-                Settings.COLORS["pressed_yellow"]
-            ),
-        }
+        self.options = [
+            MenuOptionButton(center_x, start_y, "JUGAR", self.on_play),
+            MenuOptionButton(center_x, start_y + spacing, "INSTRUCCIONES", self.on_instructions),
+            MenuOptionButton(center_x, start_y + (spacing * 2), "CRÉDITOS", self.on_credits),
+            MenuOptionButton(center_x, start_y + (spacing * 3), "SALIR", self.on_exit),
+        ]
 
-        self.navigation_map = {
-            "PLAY": {
-                "up": "QUIT",
-                "down": "INSTRUCTIONS",
-                "next": "GOTO_GAMEPLAY"
-            },
-            "INSTRUCTIONS": {
-                "up": "PLAY",
-                "down": "CREDITS",
-                "next": "GOTO_INSTR"
-            },
-            "CREDITS": {
-                "up": "INSTRUCTIONS",
-                "down": "QUIT",
-                "next": "GOTO_CREDITS",
-            },
-            "QUIT": {
-                "up": "CREDITS",
-                "down": "PLAY",
-                "next": "EXIT"
-            }
-        }
-
-        self.current_selection = "PLAY"
-        self.options[self.current_selection].set_state("active")
-
-        self.pending_action = None
+        self.selected_index = 0
+        self.options[self.selected_index].set_color(Settings.Colors.Active)
+        self.pressed_option = None
         self.transition_timer = 0
 
-    def handle_events(self, events):
-        if self.pending_action:
-            return None
+    def handle_events(self, events: list[pygame.event.Event]):
+        if self.pressed_option:
+            return
 
         for event in events:
             if event.type == pygame.KEYDOWN:
-                self.options[self.current_selection].set_state("normal")
-                
-                if event.key == pygame.K_DOWN:
-                    self.current_selection = self.navigation_map[self.current_selection]["down"]
-                elif event.key == pygame.K_UP:
-                    self.current_selection = self.navigation_map[self.current_selection]["up"]
+                previous_index = self.selected_index
+                if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    self.selected_index = min(len(self.options) - 1, self.selected_index + 1)
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
+                    self.selected_index = max(0, self.selected_index - 1)
 
-                self.options[self.current_selection].set_state("active")
+                if previous_index != self.selected_index:
+                    self.options[previous_index].set_initial_color()
 
-                if event.key == pygame.K_RETURN:
+                self.options[self.selected_index].set_color(Settings.Colors.Active)
+
+                if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                     SoundPlayer.play_sfx("select")
-
-                    action = self.navigation_map[self.current_selection]["next"]
-
-                    if action == "EXIT":
-                        return action    
-
-                    self.options[self.current_selection].set_state("pressed")
-                    self.pending_action = action
+                    self.pressed_option = self.options[self.selected_index]
                     self.transition_timer = Settings.TRANSITION_DELAY
-
-        return None
     
-    def update(self, dt):
+    def update(self, dt: float):
         self.scoreboard.update()
 
-        if self.pending_action:
+        if self.pressed_option:
             self.transition_timer -= dt
-
             if self.transition_timer <= 0:
-                action = self.pending_action
-                self.pending_action = None
-                return action
+                self.pressed_option.action()
+                self.pressed_option = None
+                return
             
         return None
     
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface):
         if self.bg_image:
             scaled_bg = pygame.transform.scale(self.bg_image, surface.get_size())
             surface.blit(scaled_bg, (0, 0))
         else:
-            surface.fill(Settings.COLORS["bg_color"])
+            surface.fill(Settings.Colors.Background)
 
         self.scoreboard.draw(surface)
 
         for label in self.title_group:
             label.draw(surface)
 
-        for key, option in self.options.items():
-            if key == self.current_selection and self.pending_action:
+        for option in self.options:
+            if self.pressed_option == option:
                 if int(self.transition_timer * 10) % 2 == 0:
                     option.draw(surface)
             else:
                 option.draw(surface)
+
+    def on_play(self):
+        ScoreManager().reset_current()
+        self.game.current_screen = InGameScreen(self.game)
+
+    def on_instructions(self):
+        print("Iniciando instrucciones...")
+
+    def on_credits(self):
+        print("Iniciando créditos...")
+
+    def on_exit(self):
+        self.game.stop()

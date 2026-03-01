@@ -1,33 +1,38 @@
 import pygame
-
 from src.config.settings import Settings
-
 from src.managers.sound_player import SoundPlayer
+from arcade_machine_sdk import BASE_WIDTH
+
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, speed, image):
+    def __init__(self, speed: float, image: pygame.Surface) -> None:
         super().__init__()
-        self.image = image
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.pos_x = float(self.rect.x)
-        self.speed = speed
+        self.image: pygame.Surface = image
+        self.rect: pygame.Rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
+        self.pos_x: float = 0
+        self.speed: float = speed
 
-        self.lives = Settings.PLAYER_LIVES
-        self.is_alive = True
-        self.is_visible = True
+        self.lives: int = Settings.PLAYER_LIVES
+        self.is_alive: bool = True
+        self.is_visible: bool = True
 
-        self.moving_left = False
-        self.moving_right = False
+        self.moving_left: bool = False
+        self.moving_right: bool = False
 
-        self.is_invincible = False
-        self.invincibility_timer = 0
+        self.is_invincible: bool = False
+        self.invincibility_timer: float = 0
 
-    def get_rect(self):
+    def set_initial_pos(self):
+        self.rect.x = (BASE_WIDTH - self.image.get_width()) // 2
+        self.rect.y = Settings.PLAYER_INITIAL_Y
+        self.pos_x: float = float(self.rect.x)
+
+    def get_rect(self) -> pygame.Rect:
         return self.rect
     
-    def take_damage(self):
+    def take_damage(self) -> str:
         SoundPlayer.play_sfx("get_hurt", 0.4)
 
         if self.is_invincible:
@@ -41,12 +46,11 @@ class Player(pygame.sprite.Sprite):
         
         self.is_invincible = True
         self.invincibility_timer = 3.0
-        self.pos_x = float(Settings.PLAYER_X)
-        self.rect.x = int(self.pos_x)
+        self.set_initial_pos()
 
         return "LIFE_LOST"
 
-    def get_player_input(self, e):
+    def get_player_input(self, e: pygame.event.Event) -> None:
         if not self.is_alive: return
         
         if e.type == pygame.KEYDOWN:
@@ -60,7 +64,7 @@ class Player(pygame.sprite.Sprite):
             if e.key == pygame.K_RIGHT:
                 self.moving_right = False
 
-    def update(self, dt):
+    def update(self, dt: float) -> None:
         if not self.is_alive: return
 
         if self.is_invincible:
@@ -85,7 +89,7 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.x = int(self.pos_x)
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
         if self.is_visible and self.image:
             if self.is_invincible:
                 if int(self.invincibility_timer * 10) % 2 == 0:
