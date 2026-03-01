@@ -1,29 +1,38 @@
 import pygame
 
+from src.config.settings import Settings
+
+from src.managers.sound_player import SoundPlayer
+
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, speed, image):
+    def __init__(self, speed, image):
         super().__init__()
-        self.x = x
-        self.y = y
-        self.speed = speed
         self.image = image
+        self.rect = self.image.get_rect()
+        self.pos_y = 0.0
+        self.speed = speed
         self.is_active = False
 
     def get_rect(self):
-        return pygame.Rect(self.x, self.y, self.image.get_width(), self.image.get_height())
+        return self.rect
 
-    def fire(self, x, y, player_width):
+    def fire(self, player_rect):
         if not self.is_active:
-            self.x = x + (player_width - self.image.get_width()) // 2
-            self.y = y
+            SoundPlayer.play_sfx("shoot", 0.4)
+            self.rect.centerx = player_rect.centerx
+            self.rect.bottom = player_rect.top
+            
+            self.pos_y = float(self.rect.y)
             self.is_active = True
 
     def update(self, dt):
         if self.is_active:
-            self.y -= self.speed * dt * 60
-            if self.y <= 0:
+            self.pos_y -= self.speed * dt
+            self.rect.y = int(self.pos_y)
+
+            if self.rect.bottom < 0:
                 self.is_active = False
-    
+
     def draw(self, surface):
         if self.is_active:
-            surface.blit(self.image, (self.x, self.y))
+            surface.blit(self.image, self.rect)

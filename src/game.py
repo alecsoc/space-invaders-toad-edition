@@ -1,73 +1,74 @@
 import pygame
 from arcade_machine_sdk import GameBase
 
-# Configuración y Managers
-from config.settings import Settings
-from managers.asset_manager import AssetManager
-from managers.sound_player import SoundPlayer
+from src.config.settings import Settings
+
+from src.managers.asset_manager import AssetManager
+from src.managers.sound_player import SoundPlayer
+from src.managers.score_manager import ScoreManager
+
+from src.ui.main_menu_screen import MainMenu
+from src.ui.in_game_screen import InGameScreen
 
 class Game(GameBase):
-    def __init__(self, metadata):
+    def __init__(self, metadata) -> None:
         super().__init__(metadata)
-        
-        self.is_game_over = False
-        
-        # TO-DO #1: Se instanciarán en start()
-        self.player = None
-        self.enemies = []
-        self.bullets = []
 
     def start(self, surface: pygame.Surface) -> None:
         super().start(surface)
 
         if not pygame.mixer.get_init():
             pygame.mixer.init()
-        
-        # Cargar todos los assets
+            
+        if not pygame.font.get_init():
+            pygame.font.init()
+
         AssetManager.load_all_assets()
-        
-        # Iniciar tema principal
-        SoundPlayer.play_music("main_theme")
-        
-        # Preparación de lógica (véase 'TO-DO #1')
-        self.is_game_over = False
-        print(f"--- {Settings.TITLE} Iniciado ---")
+
+        self.screens = {
+            "MAIN_MENU": MainMenu(),
+            "GAMEPLAY": InGameScreen(),
+        }
+
+        self.current_screen = self.screens["MAIN_MENU"]
+
+    def _process_screen_result(self, result: str) -> None:
+        if result == "GOTO_GAMEPLAY":
+            ScoreManager().reset_current()
+            self.screens["GAMEPLAY"].reset_game()
+            self.current_screen = self.screens["GAMEPLAY"]
+        elif result == "GOTO_INSTR":
+            print("Iniciando instrucciones...")
+        elif result == "GOTO_CREDITS":
+            print("Iniciando créditos...")
+        elif result == "GOTO_MENU":
+            self.current_screen = self.screens["MAIN_MENU"]
+        elif result == "EXIT":
+            self.stop()
 
     def handle_events(self, events: list[pygame.event.Event]) -> None:
-        pausa = False
-        for e in events:
-            # Ejemplo de salida rápida (SUJETA A CAMBIOS)
-            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
-                self.stop()
-        for event in pygame.event.get():
-            if event.type ==  pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    pausa = True
-                    confirmation = InGameScreen.pause(pausa)
-            if not confirmation:
-                pygame.display.flip()
-                    
-                    
-            
-            # TO-DO #2: Aquí irá la lógica de: self.player.handle_input(event)
+        result = self.current_screen.handle_events(events)
+        
+        if result:
+            self._process_screen_result(result)
 
     def update(self, dt: float) -> None:
-        if not self._running or self.is_game_over:
+        if not self._running:
             return
+        
+        if self.current_screen:
+            result = self.current_screen.update(dt)
 
-        # TO-DO #3: Ejemplo de lo que vendrá:
-        # self.player.update(dt)
-        pass
+            if result:
+                self._process_screen_result(result)
 
     def render(self) -> None:
-        self.surface.fill(Settings.BG_COLOR)
+        self.surface.fill((0, 0, 0)) 
+    
+        if self.current_screen:
+            self.current_screen.draw(self.surface)
         
-        bg = Settings.IMAGES.get("background")
-        if bg:
-            self.surface.blit(bg, (0, 0))
-
-        # TO-DO #4: El renderizado de entidades vendrá aquí:
-        # if self.player: self.player.draw(self.surface)
+        pygame.display.flip()
 
     def stop(self) -> None:
         print("Deteniendo Space Invaders...")

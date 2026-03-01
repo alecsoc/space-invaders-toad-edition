@@ -1,65 +1,166 @@
 import pygame
-class PrincipalMenu:
-    #color blanco
-    def __init__(self, font_path, font_size, text_color, text_color2, start_text = "Jugar (Oprime Enter)", quit_text = "Quitar Juego (Oprime T)", text_rule = "Reglas (Oprime L)", rules_text1 = "C (Pausar Juego)", 
-                 rules_text2 = "W = Arriba, S = Abajo, A = Izquierda, D = Derecha", rules_text3 = "Z (Continuar Juego)"):
-       self.text_color = text_color
-       self.text_color2 = self.text_color2
-       self.start_text = start_text
-       self.quit_text = quit_text
-       self.font_start = pygame.font.Font(font_path, font_size)
-       self.font_rules = pygame.font.Font(font_path, font_size // 2)
-       self.rules_text1 = rules_text1
-       self.rules_text2 = rules_text2
-       self.rules_text3 = rules_text3
-       self.text_rule = text_rule
 
+from src.config.settings import Settings
 
-    def draw(self, surface):
+from src.managers.asset_manager import AssetManager
+from src.managers.sound_player import SoundPlayer
 
-        texts = [
-            self.start_text,
-            self.text_rule,
-            self.quit_text
+from src.ui.components.text_label import TextLabel
+from src.ui.components.scoreboard import Scoreboard
+
+class MainMenu:
+    def __init__(self):
+        self.bg_image = AssetManager.get_image("menu_bg")
+
+        self.scoreboard = Scoreboard()
+
+        screen_w = Settings.WIDTH
+        screen_h = Settings.HEIGHT
+
+        center_x = screen_w // 2
+        start_y = screen_h // 2
+        spacing = 90
+
+        self.title_group = [
+            TextLabel(
+                x=center_x, 
+                y=((screen_h // 4.5) + (i * 80)),
+                text=text.upper(), 
+                font_key="pixel", 
+                font_size=100 if i < 2 else 45
+            )
+            for i, text in enumerate(["SPACE", "INVADERS"])
         ]
-        y = surface.get_height() // 2 - 50
 
-        for text in texts:
-           text_surface = self.font_rules.render(text, True, self.text_color2)
-           text_rect = text_surface.get_rect(center=(surface.get_width() // 2, y))
-           surface.blit(text_surface, text_rect)
-           y += text_surface.get_height() + 10  
+        self.options = {
+            "PLAY": TextLabel(
+                x=center_x, 
+                y=start_y, 
+                text="JUGAR", 
+                font_key="pixel",
+            )
+            .config_option(
+                Settings.COLORS["active_yellow"], 
+                Settings.COLORS["pressed_yellow"]
+            ),
+            "INSTRUCTIONS": TextLabel(
+                x=center_x,
+                y=start_y + spacing,
+                text="INSTRUCCIONES",
+                font_key="pixel"
+            )
+            .config_option(
+                Settings.COLORS["active_yellow"], 
+                Settings.COLORS["pressed_yellow"]
+            ),
+            "CREDITS": TextLabel(
+                x=center_x,
+                y=start_y + (spacing * 2),
+                text="CRÉDITOS",
+                font_key="pixel"
+            )
+            .config_option(
+                Settings.COLORS["active_yellow"], 
+                Settings.COLORS["pressed_yellow"]
+            ),
+            "QUIT": TextLabel(
+                x=center_x, 
+                y=start_y + (spacing * 3), 
+                text="SALIR", 
+                font_key="pixel"
+            )
+            .config_option(
+                Settings.COLORS["active_yellow"], 
+                Settings.COLORS["pressed_yellow"]
+            ),
+        }
 
-    @staticmethod
-    def draw_rules(self, surface):
-        rules = [
-        self.rules_text1,
-        self.rules_text2,
-        self.rules_text3
-    ]
-        y = surface.get_height() // 2 - 50
+        self.navigation_map = {
+            "PLAY": {
+                "up": "QUIT",
+                "down": "INSTRUCTIONS",
+                "next": "GOTO_GAMEPLAY"
+            },
+            "INSTRUCTIONS": {
+                "up": "PLAY",
+                "down": "CREDITS",
+                "next": "GOTO_INSTR"
+            },
+            "CREDITS": {
+                "up": "INSTRUCTIONS",
+                "down": "QUIT",
+                "next": "GOTO_CREDITS",
+            },
+            "QUIT": {
+                "up": "CREDITS",
+                "down": "PLAY",
+                "next": "EXIT"
+            }
+        }
 
-        for rule in rules:
-           rule_surface = self.font_rules.render(rule, True, self.text_color2)
-           rule_rect = rule_surface.get_rect(center=(surface.get_width() // 2, y))
-           surface.blit(rule_surface, rule_rect)
-           y += rule_surface.get_height() + 10  
-        pygame.display.flip()
-        
+        self.current_selection = "PLAY"
+        self.options[self.current_selection].set_state("active")
 
+        self.pending_action = None
+        self.transition_timer = 0
 
-        #for event in pygame.event.get():
-         #   if event.type == pygame.KEYDOWN:
-           #    if event.key == pygame.K_z:
-            #     paused = not paused
-        #if paused:
-         #   InGameScreen.draw(paused)
+    def handle_events(self, events):
+        if self.pending_action:
+            return None
 
-        """start_surface = self.font_start.render(self.start_text, True, self.text_color)
-        start_rect = start_surface.get_rect(midtop=(surface.get_width() // 2, surface.get_height() // 2 - start_surface.get_height()))
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                self.options[self.current_selection].set_state("normal")
+                
+                if event.key == pygame.K_DOWN:
+                    self.current_selection = self.navigation_map[self.current_selection]["down"]
+                elif event.key == pygame.K_UP:
+                    self.current_selection = self.navigation_map[self.current_selection]["up"]
 
-        rule_surface = self.font_start.render(self.text_rule, True, self.text_color2)
-        rule_rect = rule_surface.get_rect(midtop=(start_rect.centerx, start_rect.bottom + 22))
+                self.options[self.current_selection].set_state("active")
 
-        surface.blit(start_surface, start_rect)
-        surface.blit(rule_surface, rule_rect)"""
+                if event.key == pygame.K_RETURN:
+                    SoundPlayer.play_sfx("select")
+
+                    action = self.navigation_map[self.current_selection]["next"]
+
+                    if action == "EXIT":
+                        return action    
+
+                    self.options[self.current_selection].set_state("pressed")
+                    self.pending_action = action
+                    self.transition_timer = Settings.TRANSITION_DELAY
+
+        return None
+    
+    def update(self, dt):
+        self.scoreboard.update()
+
+        if self.pending_action:
+            self.transition_timer -= dt
+
+            if self.transition_timer <= 0:
+                action = self.pending_action
+                self.pending_action = None
+                return action
+            
+        return None
+    
+    def draw(self, surface):
+        if self.bg_image:
+            scaled_bg = pygame.transform.scale(self.bg_image, surface.get_size())
+            surface.blit(scaled_bg, (0, 0))
+        else:
+            surface.fill(Settings.COLORS["bg_color"])
+
+        self.scoreboard.draw(surface)
+
+        for label in self.title_group:
+            label.draw(surface)
+
+        for key, option in self.options.items():
+            if key == self.current_selection and self.pending_action:
+                if int(self.transition_timer * 10) % 2 == 0:
+                    option.draw(surface)
+            else:
+                option.draw(surface)
