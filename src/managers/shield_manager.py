@@ -8,7 +8,7 @@ class ShieldManager:
     def __init__(self) -> None:
         self.shields: list[pygame.sprite.Group] = []
         self.block_size: int = 5
-        self._create_multiple_shields()
+        self.generate_shields()
 
     def _create_shield(self, start_x: int, start_y: int) -> pygame.sprite.Group:
         group: pygame.sprite.Group = pygame.sprite.Group()
@@ -23,7 +23,8 @@ class ShieldManager:
 
         return group
 
-    def _create_multiple_shields(self) -> None:
+    def generate_shields(self) -> None:
+        self.shields.clear()
         amount: int = 4
         shield_width: int = len(Settings.SHIELD_SHAPE[0]) * self.block_size
         offset: int = (Settings.WIDTH - (amount * shield_width)) // (amount + 1)

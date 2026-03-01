@@ -103,6 +103,7 @@ class InGameScreen(BaseScreen):
         if status == "CLEARED":
             self.current_stage += 1
             self.stage_label.set_text("STAGE " + str(self.current_stage))
+            self.shield_manager.generate_shields()
             self._setup_entities()
 
             return None
