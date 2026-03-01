@@ -11,7 +11,7 @@ from src.entities.bullet import Bullet
 from src.entities.player import Player
 from src.ui.base_screen import BaseScreen
 from typing import TYPE_CHECKING, List, Optional
-from arcade_machine_sdk import BASE_WIDTH
+from src.ui.components.text_label import TextLabel
 
 if TYPE_CHECKING:
     from src.game import Game
@@ -25,6 +25,8 @@ class InGameScreen(BaseScreen):
         self.shield_manager: ShieldManager = ShieldManager()
         
         self.current_stage: int = 1
+        self.stage_label = TextLabel(500, 63, "STAGE " + str(self.current_stage), font_key="pixel")
+
         self.game_over: bool = False
         self.game_over_hud: GameOverComponent = GameOverComponent()
         self.return_to_menu_timer: float = 5.0
@@ -100,6 +102,7 @@ class InGameScreen(BaseScreen):
 
         if status == "CLEARED":
             self.current_stage += 1
+            self.stage_label.set_text("STAGE " + str(self.current_stage))
             self._setup_entities()
 
             return None
@@ -172,6 +175,8 @@ class InGameScreen(BaseScreen):
             bullet.draw(surface)
         self.player.draw(surface)
         self.scoreboard.draw(surface)
+
+        self.stage_label.draw(surface)
 
         if self.game_over:
             self.game_over_hud.draw(surface)

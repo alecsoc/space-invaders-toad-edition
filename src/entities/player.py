@@ -5,6 +5,9 @@ from arcade_machine_sdk import BASE_WIDTH
 
 
 class Player(pygame.sprite.Sprite):
+    ACCELERATION = 1800.0
+    FRICTION = 1800.0
+
     def __init__(self, speed: float, image: pygame.Surface) -> None:
         super().__init__()
         self.image: pygame.Surface = image
@@ -12,6 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.x = 0
         self.rect.y = 0
         self.pos_x: float = 0
+        self.vel_x: float = 0.0
         self.speed: float = speed
 
         self.lives: int = Settings.PLAYER_LIVES
@@ -24,14 +28,15 @@ class Player(pygame.sprite.Sprite):
         self.is_invincible: bool = False
         self.invincibility_timer: float = 0
 
-    def set_initial_pos(self):
+    def set_initial_pos(self) -> None:
         self.rect.x = (BASE_WIDTH - self.image.get_width()) // 2
         self.rect.y = Settings.PLAYER_INITIAL_Y
-        self.pos_x: float = float(self.rect.x)
+        self.pos_x = float(self.rect.x)
+        self.vel_x = 0.0           # reset velocity on repositioning
 
     def get_rect(self) -> pygame.Rect:
         return self.rect
-    
+
     def take_damage(self) -> str:
         SoundPlayer.play_sfx("get_hurt", 0.4)
 
@@ -43,7 +48,7 @@ class Player(pygame.sprite.Sprite):
         if self.lives <= 0:
             self.is_alive = False
             return "GAME_OVER"
-        
+
         self.is_invincible = True
         self.invincibility_timer = 3.0
         self.set_initial_pos()
@@ -52,7 +57,7 @@ class Player(pygame.sprite.Sprite):
 
     def get_player_input(self, e: pygame.event.Event) -> None:
         if not self.is_alive: return
-        
+
         if e.type == pygame.KEYDOWN:
             if e.key == pygame.K_LEFT:
                 self.moving_left = True
@@ -69,23 +74,30 @@ class Player(pygame.sprite.Sprite):
 
         if self.is_invincible:
             self.invincibility_timer -= dt
-            
             if self.invincibility_timer <= 0:
                 self.is_invincible = False
 
-        move_step = self.speed * dt
-
         if self.moving_left and not self.moving_right:
-            self.pos_x -= move_step
+            self.vel_x -= self.ACCELERATION * dt
         elif self.moving_right and not self.moving_left:
-            self.pos_x += move_step
+            self.vel_x += self.ACCELERATION * dt
+        else:
+            if self.vel_x > 0:
+                self.vel_x = max(0.0, self.vel_x - self.FRICTION * dt)
+            elif self.vel_x < 0:
+                self.vel_x = min(0.0, self.vel_x + self.FRICTION * dt)
+
+        self.vel_x = max(-self.speed, min(self.speed, self.vel_x))
+
+        self.pos_x += self.vel_x * dt
 
         margin = 10
-
         if self.pos_x < margin:
-            self.pos_x = margin
+            self.pos_x = float(margin)
+            self.vel_x = 0.0
         elif self.pos_x > Settings.WIDTH - self.rect.width - margin:
-            self.pos_x = Settings.WIDTH - self.rect.width - margin
+            self.pos_x = float(Settings.WIDTH - self.rect.width - margin)
+            self.vel_x = 0.0
 
         self.rect.x = int(self.pos_x)
 

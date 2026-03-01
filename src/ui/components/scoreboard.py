@@ -23,7 +23,7 @@ class Scoreboard:
         fin_x: int = screen_w - 100
         init_x: int = 100
         margin_top: int = 50
-        gap: int = margin_top * 2
+        gap: int = int(margin_top * 1.5)
 
         text_size: int = 30
 

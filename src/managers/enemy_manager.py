@@ -12,7 +12,7 @@ class EnemyManager:
         self.stage: int = stage
         self.direction: int = 1
 
-        self.speed: float = Settings.ENEMY_SPEED_BASE + ((stage - 1) * Settings.ENEMY_SPEED_INCREMENT)
+        self.speed: float = Settings.ENEMY_SPEED_BASE + ((stage - 1) * Settings.ENEMY_STAGE_SPEED_INCREMENT)
 
         self.shoot_delay: int = max(
             Settings.ENEMY_SHOOT_COOLDOWN_MIN,
@@ -55,30 +55,30 @@ class EnemyManager:
     def _update_movement(self, alive_enemies: list[Enemy], dt: float) -> None:
         dx: float = self.direction * self.speed * dt
 
-        for e in self.enemies:
-            if e.is_alive:
-                e.x += dx
-                e.rect.x = int(e.x)
-                e.rect.y = int(e.y)
+        for alive_enemy in self.enemies:
+            if alive_enemy.is_alive:
+                alive_enemy.x += dx
+                alive_enemy.rect.x = int(alive_enemy.x)
+                alive_enemy.rect.y = int(alive_enemy.y)
 
         hit_edge: bool = False
-        for e in alive_enemies:
+        for alive_enemy in alive_enemies:
             if self.direction == 1:
-                if e.x + e.image.get_width() >= Settings.WIDTH - 20:
+                if alive_enemy.x + alive_enemy.image.get_width() >= Settings.WIDTH - 20:
                     hit_edge = True
                     break
             else:
-                if e.x <= 20:
+                if alive_enemy.x <= 20:
                     hit_edge = True
                     break
 
         if hit_edge:
             self.direction *= -1
 
-            for e in self.enemies:
-                if e.is_alive:
-                    e.y += Settings.ENEMY_Y_CHANGE
-                    e.x += self.direction * 5
+            for alive_enemy in self.enemies:
+                if alive_enemy.is_alive:
+                    alive_enemy.y += Settings.ENEMY_Y_CHANGE
+                    alive_enemy.x += self.direction * 5
 
     def _manage_shooting(self, alive_enemies: list[Enemy]) -> None:
         now: int = pygame.time.get_ticks()
