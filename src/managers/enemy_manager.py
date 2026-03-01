@@ -8,6 +8,8 @@ from src.entities.enemy import Enemy, EnemyBullet
 
 
 class EnemyManager:
+    SPEED_SCALE: float = 8.0
+
     def __init__(self, stage: int = 1) -> None:
         self.stage: int = stage
         self.direction: int = 1
@@ -22,6 +24,7 @@ class EnemyManager:
         self.enemies: list[Enemy] = []
         self.bullets: list[EnemyBullet] = []
         self.last_shot: int = pygame.time.get_ticks()
+        self.total_enemies: int = 0
 
         self._generate_group()
 
@@ -34,11 +37,21 @@ class EnemyManager:
                 y: int = Settings.ENEMY_OFFSET_Y + (i * Settings.ENEMY_SPACING_Y)
 
                 full_type_name: str = f"enemy_{type_name}"
-
                 new_enemy: Enemy = Enemy.create_enemy(full_type_name, x, y)
 
                 if new_enemy:
                     self.enemies.append(new_enemy)
+
+        self.total_enemies = len(self.enemies)
+
+    def _get_current_speed(self, alive_count: int) -> float:
+        if self.total_enemies == 0:
+            return self.speed
+
+        t: float = 1.0 - ((alive_count - 1) / self.total_enemies)
+        multiplier: float = 1.0 + (self.SPEED_SCALE - 1.0) * t
+
+        return self.speed * multiplier
 
     def update(self, dt: float) -> Optional[str]:
         alive_enemies: list[Enemy] = [e for e in self.enemies if e.is_alive]
@@ -53,7 +66,8 @@ class EnemyManager:
         return None
 
     def _update_movement(self, alive_enemies: list[Enemy], dt: float) -> None:
-        dx: float = self.direction * self.speed * dt
+        current_speed: float = self._get_current_speed(len(alive_enemies))
+        dx: float = self.direction * current_speed * dt
 
         for alive_enemy in self.enemies:
             if alive_enemy.is_alive:
@@ -84,7 +98,6 @@ class EnemyManager:
         now: int = pygame.time.get_ticks()
 
         if now - self.last_shot > self.shoot_delay and alive_enemies:
-
             if len(self.bullets) < Settings.ENEMY_MAX_BULLETS:
                 shooter: Enemy = random.choice(alive_enemies)
 
@@ -97,7 +110,6 @@ class EnemyManager:
                     AssetManager.get_image("enemy_bullet")
                 )
                 self.bullets.append(new_bullet)
-
                 self.last_shot = now
 
     def _update_bullets(self, dt: float) -> None:
