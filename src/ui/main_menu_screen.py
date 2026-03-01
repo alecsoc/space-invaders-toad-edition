@@ -67,9 +67,9 @@ class MainMenu(BaseScreen):
             if event.type == pygame.KEYDOWN:
                 previous_index = self.selected_index
                 if event.key == pygame.K_DOWN or event.key == pygame.K_s:
-                    self.selected_index = min(len(self.options) - 1, self.selected_index + 1)
+                    self.selected_index = (self.selected_index + 1) % len(self.options)
                 if event.key == pygame.K_UP or event.key == pygame.K_w:
-                    self.selected_index = max(0, self.selected_index - 1)
+                    self.selected_index = (self.selected_index - 1) % len(self.options)
 
                 if previous_index != self.selected_index:
                     self.options[previous_index].set_initial_color()
