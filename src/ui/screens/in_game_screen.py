@@ -30,7 +30,9 @@ class InGameScreen(BaseScreen):
         self.shield_manager: ShieldManager = ShieldManager()
         
         self.current_stage: int = 1
-        self.stage_label = TextLabel(500, 63, "STAGE " + str(self.current_stage), font_key="pixel")
+        self.margin_top: int = 50
+        self.center_x: int = Settings.WIDTH // 2
+        self.stage_label = TextLabel(self.center_x, self.margin_top, "STAGE " + str(self.current_stage), font_key="pixel")
 
         self.game_over: bool = False
         self.game_over_hud: GameOverComponent = GameOverComponent()

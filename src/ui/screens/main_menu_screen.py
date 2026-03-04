@@ -1,5 +1,5 @@
 import pygame
-from typing import TYPE_CHECKING, List, Optional, Callable
+from typing import TYPE_CHECKING, List, Optional
 
 from src.config.settings import Settings
 
@@ -13,6 +13,7 @@ from src.ui.components.text_label import TextLabel
 from src.ui.components.option_button import OptionButton
 from src.ui.components.scoreboard import Scoreboard
 
+from src.ui.screens.instructions_screen import InstructionsScreen
 from src.ui.screens.credits_screen import CreditsScreen
 from src.ui.screens.in_game_screen import InGameScreen
 
@@ -114,7 +115,7 @@ class MainMenu(BaseScreen):
         self.game.current_screen = InGameScreen(self.game)
 
     def on_instructions(self) -> None:
-        print("Iniciando instrucciones...")
+        self.game.current_screen = InstructionsScreen(self.game)
 
     def on_credits(self) -> None:
         self.game.current_screen = CreditsScreen(self.game)
