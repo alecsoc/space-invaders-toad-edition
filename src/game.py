@@ -4,7 +4,7 @@ from arcade_machine_sdk import GameBase, GameMeta
 from src.managers.asset_manager import AssetManager
 from src.managers.sound_player import SoundPlayer
 
-from src.ui.main_menu_screen import MainMenu
+from src.ui.screens.main_menu_screen import MainMenu
 from src.ui.base_screen import BaseScreen
 
 class Game(GameBase):
