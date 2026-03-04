@@ -1,27 +1,23 @@
 import pygame
+from typing import TYPE_CHECKING
 
 from src.config.settings import Settings
 
 from src.managers.asset_manager import AssetManager
 from src.managers.sound_player import SoundPlayer
+from src.managers.score_manager import ScoreManager
+
+from src.ui.base_screen import BaseScreen
 
 from src.ui.components.text_label import TextLabel
+from src.ui.components.option_button import OptionButton
 from src.ui.components.scoreboard import Scoreboard
-from src.ui.base_screen import BaseScreen
-from typing import Callable
-from src.managers.score_manager import ScoreManager
-from typing import TYPE_CHECKING
+
 from src.ui.in_game_screen import InGameScreen
 
 if TYPE_CHECKING:
     from src.game import Game
-
-class MenuOptionButton(TextLabel):
-    def __init__(self, x: int, y: int, text: str, action: Callable[[], None]):
-        super().__init__(x, y, text, font_key="pixel")
-        self.action = action
     
-
 class MainMenu(BaseScreen):
     def __init__(self, game: "Game"):
         super().__init__(game)
@@ -48,10 +44,10 @@ class MainMenu(BaseScreen):
         ]
 
         self.options = [
-            MenuOptionButton(center_x, start_y, "JUGAR", self.on_play),
-            MenuOptionButton(center_x, start_y + spacing, "INSTRUCCIONES", self.on_instructions),
-            MenuOptionButton(center_x, start_y + (spacing * 2), "CRÉDITOS", self.on_credits),
-            MenuOptionButton(center_x, start_y + (spacing * 3), "SALIR", self.on_exit),
+            OptionButton(center_x, start_y, "JUGAR", self.on_play),
+            OptionButton(center_x, start_y + spacing, "INSTRUCCIONES", self.on_instructions),
+            OptionButton(center_x, start_y + (spacing * 2), "CRÉDITOS", self.on_credits),
+            OptionButton(center_x, start_y + (spacing * 3), "SALIR", self.on_exit),
         ]
 
         self.selected_index = 0
