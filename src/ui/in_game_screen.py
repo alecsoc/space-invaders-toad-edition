@@ -20,7 +20,7 @@ class InGameScreen(BaseScreen):
     def __init__(self, game: "Game") -> None:
         super().__init__(game)
 
-        self.bg_image: Optional[pygame.Surface] = AssetManager.get_image("menu_bg")
+        self.bg_image: Optional[pygame.Surface] = AssetManager.get_image("main_bg")
         self.scoreboard: Scoreboard = Scoreboard()
         self.shield_manager: ShieldManager = ShieldManager()
         
@@ -56,7 +56,7 @@ class InGameScreen(BaseScreen):
     def _handle_defeat(self) -> None:
         self.game_over = True
         SoundPlayer.stop_music()
-        SoundPlayer.play_sfx("game_over")
+        SoundPlayer.play_sfx("game_over", 1.0)
         ScoreManager().save_high_score()
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
@@ -181,3 +181,13 @@ class InGameScreen(BaseScreen):
 
         if self.game_over:
             self.game_over_hud.draw(surface)
+
+        self._draw_lives_icons(surface)
+
+    def _draw_lives_icons(self, surface):
+        if self.player.image:
+            life_icon = pygame.transform.scale(self.player.image, (25, 20))
+            for i in range(self.player.lives):
+                x = 20 + (i * 35)
+                y = Settings.HEIGHT - 35
+                surface.blit(life_icon, (x, y))

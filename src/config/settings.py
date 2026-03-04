@@ -78,8 +78,7 @@ class Settings:
 
     # Assets Maps
     IMAGES_MAP = {
-        "menu_bg": "menu_background.png",
-        "game_bg": "gameplay_background.png",
+        "main_bg": "background.png",
         "player": "spaceship.png",
         "bullet": "bullet.png",
         "enemy_squid": "squid.png",

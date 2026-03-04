@@ -25,7 +25,7 @@ class MenuOptionButton(TextLabel):
 class MainMenu(BaseScreen):
     def __init__(self, game: "Game"):
         super().__init__(game)
-        self.bg_image = AssetManager.get_image("menu_bg")
+        self.bg_image = AssetManager.get_image("main_bg")
 
         self.scoreboard = Scoreboard()
 
