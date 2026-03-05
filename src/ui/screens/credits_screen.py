@@ -12,11 +12,13 @@ from src.ui.components.text_label import TextLabel
 from src.ui.components.option_button import OptionButton
 
 if TYPE_CHECKING:
-    from src.game import Game
+    from src.ui.screens.main_menu_screen import MainMenu
 
 class CreditsScreen(BaseScreen):
-    def __init__(self, game: "Game") -> None:
-        super().__init__(game)
+    def __init__(self, parent: "MainMenu") -> None:
+        super().__init__(parent.game)
+
+        self.parent = parent
         self.bg_image: Optional[pygame.Surface] = AssetManager.get_image("main_bg")
 
         screen_w: int = Settings.WIDTH
@@ -92,5 +94,5 @@ class CreditsScreen(BaseScreen):
             self.back_button.draw(surface)
                 
     def on_back(self) -> None:
-        from src.ui.screens.main_menu_screen import MainMenu
-        self.game.current_screen = MainMenu(self.game)
+        SoundPlayer.play_music("menu_theme")
+        self.game.current_screen = self.parent

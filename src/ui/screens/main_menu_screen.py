@@ -27,7 +27,7 @@ class MainMenu(BaseScreen):
         self.bg_image: Optional[pygame.Surface] = AssetManager.get_image("main_bg")
         self.scoreboard: Scoreboard = Scoreboard()
         
-        SoundPlayer.play_music("menu_theme", 0.3)
+        SoundPlayer.play_music("menu_theme")
 
         screen_w: int = Settings.WIDTH
         screen_h: int = Settings.HEIGHT
@@ -122,13 +122,13 @@ class MainMenu(BaseScreen):
 
     def on_play(self) -> None:
         ScoreManager().reset_current()
-        self.game.current_screen = InGameScreen(self.game)
+        self.game.current_screen = InGameScreen(self)
 
     def on_instructions(self) -> None:
-        self.game.current_screen = InstructionsScreen(self.game)
+        self.game.current_screen = InstructionsScreen(self)
 
     def on_credits(self) -> None:
-        self.game.current_screen = CreditsScreen(self.game)
+        self.game.current_screen = CreditsScreen(self)
 
     def on_exit(self) -> None:
         self.game.stop()

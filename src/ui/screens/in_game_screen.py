@@ -19,12 +19,13 @@ from src.entities.bullet import Bullet
 from src.entities.player import Player
 
 if TYPE_CHECKING:
-    from src.game import Game
+    from src.ui.screens.main_menu_screen import MainMenu
 
 class InGameScreen(BaseScreen):
-    def __init__(self, game: "Game") -> None:
-        super().__init__(game)
+    def __init__(self, parent: "MainMenu") -> None:
+        super().__init__(parent.game)
 
+        self.parent = parent
         self.bg_image: Optional[pygame.Surface] = AssetManager.get_image("main_bg")
         self.scoreboard: Scoreboard = Scoreboard()
         self.shield_manager: ShieldManager = ShieldManager()
@@ -96,8 +97,8 @@ class InGameScreen(BaseScreen):
             self.return_to_menu_timer -= dt
 
             if self.return_to_menu_timer <= 0:
-                from src.ui.screens.main_menu_screen import MainMenu
-                self.game.current_screen = MainMenu(self.game)
+                SoundPlayer.play_music("menu_theme")
+                self.game.current_screen = self.parent
                 return
         
             return None
