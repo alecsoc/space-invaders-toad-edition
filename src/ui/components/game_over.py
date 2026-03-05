@@ -15,6 +15,6 @@ class GameOverComponent:
             font_size=80
         )
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface):
         if int(pygame.time.get_ticks() / 500) % 2 == 0:
             self.label.draw(surface)

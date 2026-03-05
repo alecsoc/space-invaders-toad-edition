@@ -1,0 +1,134 @@
+import pygame
+from typing import TYPE_CHECKING, List, Optional
+
+from src.config.settings import Settings
+
+from src.managers.asset_manager import AssetManager
+from src.managers.sound_player import SoundPlayer
+from src.managers.score_manager import ScoreManager
+
+from src.ui.base_screen import BaseScreen
+
+from src.ui.components.text_label import TextLabel
+from src.ui.components.option_button import OptionButton
+from src.ui.components.scoreboard import Scoreboard
+
+from src.ui.screens.instructions_screen import InstructionsScreen
+from src.ui.screens.credits_screen import CreditsScreen
+from src.ui.screens.in_game_screen import InGameScreen
+
+if TYPE_CHECKING:
+    from src.game import Game
+
+class MainMenu(BaseScreen):
+    def __init__(self, game: "Game") -> None:
+        super().__init__(game)
+
+        self.bg_image: Optional[pygame.Surface] = AssetManager.get_image("main_bg")
+        self.scoreboard: Scoreboard = Scoreboard()
+        
+        SoundPlayer.play_music("menu_theme", 0.3)
+
+        screen_w: int = Settings.WIDTH
+        screen_h: int = Settings.HEIGHT
+
+        center_x: int = screen_w // 2
+        start_y: int = screen_h // 2
+        spacing: int = 90
+
+        self.title_group: List[TextLabel] = [
+            TextLabel(
+                x=center_x, 
+                y=int(((screen_h // 4.5) + (i * 80))),
+                text=text.upper(), 
+                font_key="pixel", 
+                font_size=100 if i < 2 else 45
+            )
+            for i, text in enumerate(["SPACE", "INVADERS"])
+        ]
+
+        self.options: List[OptionButton] = [
+            OptionButton(center_x, start_y, "JUGAR", self.on_play),
+            OptionButton(center_x, start_y + spacing, "INSTRUCCIONES", self.on_instructions),
+            OptionButton(center_x, start_y + (spacing * 2), "CRÉDITOS", self.on_credits),
+            OptionButton(center_x, start_y + (spacing * 3), "SALIR", self.on_exit),
+        ]
+
+        self.selected_index: int = 0
+        self.options[self.selected_index].set_color(Settings.Colors.Active)
+        self.pressed_option: Optional[OptionButton] = None
+        self.transition_timer: float = 0
+
+    def handle_events(self, events: List[pygame.event.Event]) -> None:
+        if self.pressed_option: return
+
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                previous_index: int = self.selected_index
+
+                if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    SoundPlayer.play_sfx("option", 0.2)
+                    self.selected_index = (self.selected_index + 1) % len(self.options)
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
+                    SoundPlayer.play_sfx("option", 0.2)
+                    self.selected_index = (self.selected_index - 1) % len(self.options)
+
+                if previous_index != self.selected_index:
+                    self.options[previous_index].set_initial_color()
+
+                self.options[self.selected_index].set_color(Settings.Colors.Active)
+
+                if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
+                    SoundPlayer.play_sfx("select")
+                    self.pressed_option = self.options[self.selected_index]
+
+                    if self.selected_index == 0:
+                        self.transition_timer = Settings.TRANSITION_DELAY * 3
+                        SoundPlayer.stop_music()
+                        SoundPlayer.play_sfx("on_start")
+                    else:
+                        self.transition_timer = Settings.TRANSITION_DELAY
+
+    def update(self, dt: float) -> None:
+        self.scoreboard.update()
+
+        if self.pressed_option:
+            self.transition_timer -= dt
+            if self.transition_timer <= 0:
+                self.pressed_option.action()
+                self.pressed_option = None
+                return
+            
+        return None
+    
+    def draw(self, surface: pygame.Surface) -> None:
+        if self.bg_image:
+            scaled_bg: pygame.Surface = pygame.transform.scale(self.bg_image, surface.get_size())
+            surface.blit(scaled_bg, (0, 0))
+        else:
+            surface.fill(Settings.Colors.Background)
+
+        self.scoreboard.draw(surface)
+
+        for label in self.title_group:
+            label.draw(surface)
+            
+        for option in self.options:
+            if self.pressed_option == option:
+                if int(self.transition_timer * 10) % 2 == 0:
+                    option.draw(surface)
+            else:
+                option.draw(surface)
+
+    def on_play(self) -> None:
+        ScoreManager().reset_current()
+        self.game.current_screen = InGameScreen(self.game)
+
+    def on_instructions(self) -> None:
+        self.game.current_screen = InstructionsScreen(self.game)
+
+    def on_credits(self) -> None:
+        self.game.current_screen = CreditsScreen(self.game)
+
+    def on_exit(self) -> None:
+        self.game.stop()

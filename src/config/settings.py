@@ -1,5 +1,6 @@
 from pathlib import Path
 from arcade_machine_sdk import BASE_WIDTH, BASE_HEIGHT, DEFAULT_FPS
+import pygame
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -20,8 +21,7 @@ class Settings:
     FPS = DEFAULT_FPS
 
     # Logic Parameters
-    PLAYER_X = WIDTH // 2
-    PLAYER_Y = 680
+    PLAYER_INITIAL_Y = 680
     PLAYER_SPEED = 350
     BULLET_SPEED = 500
     PLAYER_FIRE_COOLDOWN = 400
@@ -33,7 +33,8 @@ class Settings:
     ENEMY_MAX_BULLETS = 10
 
     ENEMY_SPEED_BASE = 40
-    ENEMY_SPEED_INCREMENT = 10
+    ENEMY_STAGE_SPEED_INCREMENT = 10
+    ENEMY_SPEED_INCREMENT = 3
     ENEMY_DROP_DISTANCE = 1
     ENEMY_MARGIN = 20
     ENEMY_X_CHANGE = 100
@@ -62,13 +63,12 @@ class Settings:
     TRANSITION_DELAY = 1.0
 
     # Colors
-    COLORS = {
-        "bg_color": (41, 60, 94),
-        "white": (255, 255, 255),
-        "black": (0, 0, 0),
-        "active_yellow": (255, 255, 0),
-        "pressed_yellow": (200, 200, 0),
-    }
+    class Colors:
+        Background = (41, 60, 94)
+        White = (255, 255, 255)
+        Black = (0, 0, 0)
+        Active = (255, 255, 0)
+        Pressed = (200, 200, 0)
 
     # Assets Paths
     ASSETS_PATH = BASE_DIR / "assets"
@@ -78,22 +78,23 @@ class Settings:
 
     # Assets Maps
     IMAGES_MAP = {
-        "menu_bg": "menu_background.png",
-        "game_bg": "gameplay_background.png",
+        "main_bg": "background.png",
         "player": "spaceship.png",
         "bullet": "bullet.png",
         "enemy_squid": "squid.png",
         "enemy_crab": "crab.png",
         "enemy_octopus": "octopus.png",
-        "enemy_bullet": "enemy_laser.png",
-        "icon": "ufo.png"
+        "enemy_bullet": "enemy_laser.png"
     }
 
     SOUNDS_MAP = {
         "main_theme": "music/galaxy_move.wav",
+        "menu_theme": "music/invasion_alert.wav",
+        "on_start": "sfx/lets_play.wav",
         "shoot": "sfx/shoot_ship.wav",
         "explosion": "sfx/hit_enemy.wav",
         "get_hurt": "sfx/hit_player.wav",
+        "option": "sfx/move_option.wav",
         "select": "sfx/select.wav",
         "game_over": "sfx/game_over.wav"
     }
@@ -101,6 +102,6 @@ class Settings:
     FONTS_MAP = {"pixel": "score_text.ttf"}
 
     # Dict for AssetManager
-    IMAGES = {}
-    SOUNDS = {}
-    FONTS = {}
+    IMAGES: dict[str, pygame.Surface] = {}
+    SOUNDS: dict[str, pygame.mixer.Sound] = {}
+    FONTS : dict[str, str]= {}
