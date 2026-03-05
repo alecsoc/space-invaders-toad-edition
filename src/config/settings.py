@@ -89,9 +89,12 @@ class Settings:
 
     SOUNDS_MAP = {
         "main_theme": "music/galaxy_move.wav",
+        "menu_theme": "music/invasion_alert.wav",
+        "on_start": "sfx/lets_play.wav",
         "shoot": "sfx/shoot_ship.wav",
         "explosion": "sfx/hit_enemy.wav",
         "get_hurt": "sfx/hit_player.wav",
+        "option": "sfx/move_option.wav",
         "select": "sfx/select.wav",
         "game_over": "sfx/game_over.wav"
     }

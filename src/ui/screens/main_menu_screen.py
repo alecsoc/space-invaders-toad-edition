@@ -26,6 +26,8 @@ class MainMenu(BaseScreen):
 
         self.bg_image: Optional[pygame.Surface] = AssetManager.get_image("main_bg")
         self.scoreboard: Scoreboard = Scoreboard()
+        
+        SoundPlayer.play_music("menu_theme", 0.3)
 
         screen_w: int = Settings.WIDTH
         screen_h: int = Settings.HEIGHT
@@ -65,8 +67,10 @@ class MainMenu(BaseScreen):
                 previous_index: int = self.selected_index
 
                 if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    SoundPlayer.play_sfx("option", 0.2)
                     self.selected_index = (self.selected_index + 1) % len(self.options)
                 if event.key == pygame.K_UP or event.key == pygame.K_w:
+                    SoundPlayer.play_sfx("option", 0.2)
                     self.selected_index = (self.selected_index - 1) % len(self.options)
 
                 if previous_index != self.selected_index:
@@ -77,7 +81,13 @@ class MainMenu(BaseScreen):
                 if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                     SoundPlayer.play_sfx("select")
                     self.pressed_option = self.options[self.selected_index]
-                    self.transition_timer = Settings.TRANSITION_DELAY
+
+                    if self.selected_index == 0:
+                        self.transition_timer = Settings.TRANSITION_DELAY * 3
+                        SoundPlayer.stop_music()
+                        SoundPlayer.play_sfx("on_start")
+                    else:
+                        self.transition_timer = Settings.TRANSITION_DELAY
 
     def update(self, dt: float) -> None:
         self.scoreboard.update()
