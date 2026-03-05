@@ -68,7 +68,7 @@ class InGameScreen(BaseScreen):
         ScoreManager().save_high_score()
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
-        if self.game_over:
+        if self.game_over or self.enemy_manager.showing_enemies:
             return
         
         for e in events:

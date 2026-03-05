@@ -34,6 +34,7 @@ class Enemy(pygame.sprite.Sprite):
         self.points: int = points
         self.enemy_type: str = enemy_type
         self.is_alive: bool = True
+        self.is_visible: bool = False
 
     @staticmethod
     def create_enemy(enemy_type_key: str, x: int, y: int) -> "Enemy":
@@ -51,5 +52,5 @@ class Enemy(pygame.sprite.Sprite):
             self.y += dy
 
     def draw(self, surface: pygame.Surface) -> None:
-        if self.is_alive:
+        if self.is_alive and self.is_visible:
             surface.blit(self.image, self.rect)

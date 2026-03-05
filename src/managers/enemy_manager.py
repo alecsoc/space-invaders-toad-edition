@@ -25,8 +25,12 @@ class EnemyManager:
         self.bullets: list[EnemyBullet] = []
         self.last_shot: int = pygame.time.get_ticks()
         self.total_enemies: int = 0
-
+        
+        self.showing_enemies = True
+        self.showing_enemies_timer = 0
+        
         self._generate_group()
+        self.currently_shown_enemy_index = self.total_enemies - 1
 
     def _generate_group(self) -> None:
         layout: list[str] = ["squid", "crab", "crab", "octopus", "octopus"]
@@ -54,15 +58,25 @@ class EnemyManager:
         return self.speed * multiplier
 
     def update(self, dt: float) -> Optional[str]:
-        alive_enemies: list[Enemy] = [e for e in self.enemies if e.is_alive]
+        if self.showing_enemies:
+            self.showing_enemies_timer += dt
+            if self.showing_enemies_timer >= Settings.ENEMY_APPEAR_GAP_SECONDS:
+                self.showing_enemies_timer -= Settings.ENEMY_APPEAR_GAP_SECONDS
+                if self.currently_shown_enemy_index < 0:
+                    self.showing_enemies = False
+                else:
+                    enemy = self.enemies[self.currently_shown_enemy_index]
+                    self.currently_shown_enemy_index -= 1
+                    enemy.is_visible = True
+        else:
+            alive_enemies: list[Enemy] = [e for e in self.enemies if e.is_alive]
 
-        if not alive_enemies:
-            return "CLEARED"
-
-        self._update_movement(alive_enemies, dt)
-        self._manage_shooting(alive_enemies)
-        self._update_bullets(dt)
-
+            if not alive_enemies:
+                return "CLEARED"
+            
+            self._update_movement(alive_enemies, dt)
+            self._manage_shooting(alive_enemies)
+            self._update_bullets(dt)
         return None
 
     def _update_movement(self, alive_enemies: list[Enemy], dt: float) -> None:
