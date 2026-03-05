@@ -17,6 +17,7 @@ from src.ui.components.game_over import GameOverComponent
 
 from src.entities.bullet import Bullet
 from src.entities.player import Player
+from src.ui.components.pause_overlay import PauseOverlay
 
 if TYPE_CHECKING:
     from src.ui.screens.main_menu_screen import MainMenu
@@ -29,6 +30,7 @@ class InGameScreen(BaseScreen):
         self.bg_image: Optional[pygame.Surface] = AssetManager.get_image("main_bg")
         self.scoreboard: Scoreboard = Scoreboard()
         self.shield_manager: ShieldManager = ShieldManager()
+        self.pause_overlay = PauseOverlay(self)
         
         self.current_stage: int = 1
         self.margin_top: int = 50
@@ -71,6 +73,11 @@ class InGameScreen(BaseScreen):
         if self.game_over or self.enemy_manager.showing_enemies:
             return
         
+        if self.pause_overlay.is_active:
+            self.player.reset_player_input()
+            self.pause_overlay.handle_events(events)
+            return
+        
         for e in events:
             self.player.get_player_input(e)
 
@@ -80,6 +87,9 @@ class InGameScreen(BaseScreen):
                 if now - self.last_player_shot > Settings.PLAYER_FIRE_COOLDOWN:
                     self._fire_bullet()
                     self.last_player_shot = now
+            
+            if e.type == pygame.KEYDOWN and (e.key == pygame.K_RETURN or e.key == pygame.K_ESCAPE):
+                self.pause_overlay.is_active = True
 
         return
     
@@ -93,6 +103,10 @@ class InGameScreen(BaseScreen):
         self.bullets.append(new_bullet)
     
     def update(self, dt: float) -> None:
+        if self.pause_overlay.is_active:
+            self.pause_overlay.update(dt)
+            return
+        
         if self.game_over:
             self.return_to_menu_timer -= dt
 
@@ -191,6 +205,9 @@ class InGameScreen(BaseScreen):
             self.game_over_hud.draw(surface)
 
         self._draw_lives_icons(surface)
+
+        if self.pause_overlay.is_active:
+            self.pause_overlay.draw(surface)
 
     def _draw_lives_icons(self, surface):
         img = AssetManager.get_image("player")

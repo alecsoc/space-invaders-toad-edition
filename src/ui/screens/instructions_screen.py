@@ -62,7 +62,7 @@ class InstructionsScreen(BaseScreen):
 
             self.info_labels.append(label)
 
-        self.back_button: OptionButton = OptionButton(center_x, screen_h - 100, "VOLVER", self.on_back)
+        self.back_button: OptionButton = OptionButton(center_x, screen_h - 100, "VOLVER", self.on_back, True)
         self.back_button.set_color(Settings.Colors.Active)
         self.pressed_option: Optional[OptionButton] = None
         self.transition_timer: float = 0

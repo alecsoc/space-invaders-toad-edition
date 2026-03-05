@@ -50,7 +50,7 @@ class CreditsScreen(BaseScreen):
 
             self.author_labels.append(label)
 
-        self.back_button: OptionButton = OptionButton(center_x, screen_h - 100, "VOLVER", self.on_back)
+        self.back_button: OptionButton = OptionButton(center_x, screen_h - 100, "VOLVER", self.on_back, True)
         self.back_button.set_color(Settings.Colors.Active)
         self.pressed_option: Optional[OptionButton] = None
         self.transition_timer: float = 0
@@ -65,7 +65,7 @@ class CreditsScreen(BaseScreen):
                     self.pressed_option = self.back_button
                     self.transition_timer = Settings.TRANSITION_DELAY
 
-    def update(self, dt):
+    def update(self, dt: float):
         if self.pressed_option:
             self.transition_timer -= dt
             if self.transition_timer <= 0:
@@ -75,7 +75,7 @@ class CreditsScreen(BaseScreen):
             
         return None
     
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface):
         if self.bg_image:
             scaled_bg: pygame.Surface = pygame.transform.scale(self.bg_image, surface.get_size())
             surface.blit(scaled_bg, (0, 0))

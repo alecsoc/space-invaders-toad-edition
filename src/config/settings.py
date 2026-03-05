@@ -61,7 +61,7 @@ class Settings:
         [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1]
     ]
     
-    TRANSITION_DELAY = 1.0
+    TRANSITION_DELAY = 0.5
 
     # Colors
     class Colors:
@@ -106,3 +106,7 @@ class Settings:
     IMAGES: dict[str, pygame.Surface] = {}
     SOUNDS: dict[str, pygame.mixer.Sound] = {}
     FONTS : dict[str, str]= {}
+
+    # Dynamic runtime settings
+    MUSIC_VOLUME_PERCENT: int = 100
+    SFX_VOLUME_PERCENT: int = 100

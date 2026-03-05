@@ -26,18 +26,10 @@ class TextLabel:
         self.__initial_color = color
         self.color = color
 
-        self.font = self._load_custom_font(self.font_key, self.font_size)
+        self.font = AssetManager.get_font_instance_or_default(self.font_key, self.font_size)
         self.text_surface: Optional[pygame.Surface] = None
         self.rect: pygame.Rect = pygame.Rect(x, y, 0, 0)
         self._render_surface()
-
-    def _load_custom_font(self, key: Optional[str], size: int) -> pygame.font.Font:
-        if key:
-            font_path = AssetManager.get_font(key)
-            if font_path:
-                return pygame.font.Font(font_path, size)
-
-        return pygame.font.SysFont("sans-serif", size)
 
     def draw(self, surface: pygame.Surface) -> None:
         if self.border:
@@ -56,7 +48,7 @@ class TextLabel:
             surface.blit(self.text_surface, self.rect)
 
     def _render_surface(self) -> None:
-        self.text_surface = self.font.render(self.text, True, self.color)
+        self.text_surface = self.font.render(self.get_renderable_text(), True, self.color)
 
         if self.alpha is not None:
             self.text_surface.set_alpha(self.alpha)
@@ -75,3 +67,6 @@ class TextLabel:
         if self.color != new_color:
             self.color = new_color
             self._render_surface()
+
+    def get_renderable_text(self):
+        return self.text

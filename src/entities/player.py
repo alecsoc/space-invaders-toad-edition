@@ -6,7 +6,7 @@ from arcade_machine_sdk import BASE_WIDTH
 
 class Player(pygame.sprite.Sprite):
     ACCELERATION = 1800.0
-    FRICTION = 1800.0
+    FRICTION = 4500.0
 
     def __init__(self, speed: float, image: pygame.Surface) -> None:
         super().__init__()
@@ -68,6 +68,10 @@ class Player(pygame.sprite.Sprite):
                 self.moving_left = False
             if e.key == pygame.K_RIGHT:
                 self.moving_right = False
+
+    def reset_player_input(self):
+        self.moving_left = False
+        self.moving_right = False
 
     def update(self, dt: float) -> None:
         if not self.is_alive: return

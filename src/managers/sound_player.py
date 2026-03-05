@@ -13,7 +13,7 @@ class SoundPlayer:
         path = Settings.SOUNDS_PATH / Settings.SOUNDS_MAP[music]
         try:
             mixer.music.load(str(path))
-            mixer.music.set_volume(volume)
+            mixer.music.set_volume(volume * Settings.MUSIC_VOLUME_PERCENT / 100)
             mixer.music.play(-1)
             SoundPlayer._current_music = music
         except Exception as e:
@@ -23,7 +23,7 @@ class SoundPlayer:
     def play_sfx(key: str, volume: float = 0.5):
         sound = Settings.SOUNDS.get(key)
         if sound:
-            sound.set_volume(volume)
+            sound.set_volume(volume * Settings.SFX_VOLUME_PERCENT / 100)
             sound.play()
 
     @staticmethod
