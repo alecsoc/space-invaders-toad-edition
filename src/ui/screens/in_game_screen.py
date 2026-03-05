@@ -96,7 +96,7 @@ class InGameScreen(BaseScreen):
             self.return_to_menu_timer -= dt
 
             if self.return_to_menu_timer <= 0:
-                from ui.screens.main_menu_screen import MainMenu
+                from src.ui.screens.main_menu_screen import MainMenu
                 self.game.current_screen = MainMenu(self.game)
                 return
         
@@ -192,8 +192,10 @@ class InGameScreen(BaseScreen):
         self._draw_lives_icons(surface)
 
     def _draw_lives_icons(self, surface):
-        if self.player.image:
-            life_icon = pygame.transform.scale(self.player.image, (25, 20))
+        img = AssetManager.get_image("player")
+
+        if img:
+            life_icon = pygame.transform.scale(img, (25, 20))
             for i in range(self.player.lives):
                 x = 20 + (i * 35)
                 y = Settings.HEIGHT - 35

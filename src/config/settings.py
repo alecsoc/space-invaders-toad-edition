@@ -84,8 +84,7 @@ class Settings:
         "enemy_squid": "squid.png",
         "enemy_crab": "crab.png",
         "enemy_octopus": "octopus.png",
-        "enemy_bullet": "enemy_laser.png",
-        "icon": "ufo.png"
+        "enemy_bullet": "enemy_laser.png"
     }
 
     SOUNDS_MAP = {
